@@ -84,7 +84,7 @@ public class Serial : MonoBehaviour {
 		while(true) {
 			
 			try {
-				while (serial.BytesToRead > 0) {
+				while (serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
 
 					string serialIn = serial.ReadExisting();
 
