@@ -70,6 +70,12 @@ public class Serial : MonoBehaviour
 		StartCoroutine (ReadSerialLoop ());
 	}
 
+	void OnValidate ()
+	{
+		if (bufferLines < 0)
+			bufferLines = 0;
+	}
+
 	void OnEnable ()
 	{
 		s_instances.Add (this);
@@ -137,7 +143,7 @@ public class Serial : MonoBehaviour
 
 							// Buffer line
 							if (inst.bufferLines > 0) {
-								inst.linesIn.Add(line);
+								inst.linesIn.Add (line);
 
 								// trim lines buffer
 								int overflow = inst.linesIn.Count - inst.bufferLines;
@@ -148,7 +154,7 @@ public class Serial : MonoBehaviour
 							}
 
 							// notify new line
-							inst.SendMessage("OnSerialLine", line, SendMessageOptions.DontRequireReceiver);
+							inst.SendMessage ("OnSerialLine", line, SendMessageOptions.DontRequireReceiver);
 						}
 					}
 				}

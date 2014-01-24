@@ -109,6 +109,10 @@ Prefab:
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 5d933a02b235a4e2db6b5772374384c3, type: 2}
+      propertyPath: bufferLines
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5d933a02b235a4e2db6b5772374384c3, type: 2}
   m_RootGameObject: {fileID: 763185791}
