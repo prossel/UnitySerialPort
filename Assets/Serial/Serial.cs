@@ -1,7 +1,9 @@
-﻿/* This behavior helps sending and receiving data from a serial port. 
+﻿/* 
+ * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
  * 
  * Usage 1: (when you expect line breaks)
+ * -------
  * 
  * - drop this script to a gameObject
  * - create a script on the same gameObject to receive new line notifications
@@ -12,13 +14,23 @@
  *	}
  * 
  * Usage 2: (when you don't expect line breaks)
+ * -------
  * 
  * - drop this script to a gameObject
  * - from any script, use the static props ReceivedBytesCount, ReceivedBytes 
  *   and don't forget to call ClearReceivedBytes() to avoid overflowing the buffer
  * 
+ * Troubleshooting
+ * ---------------
+ * 
+ * You may get the following error:
+ *     error CS0234: The type or namespace name `Ports' does not exist in the namespace `System.IO'. 
+ *     Are you missing an assembly reference?
+ * Solution: 
+ *     File | Build Settings | Optimization | API Compatibility Level: .Net 2.0
+ * 
+ * Author: Pierre Rossel, 2014-01-28
  */
-
 
 using UnityEngine;
 using System.Collections;
@@ -37,9 +49,33 @@ public class Serial : MonoBehaviour
 {
 
 	/// <summary>
-	/// Number of lines to buffer. Get them with GetLines() or GetLastLine()
+	/// Enable notification of data as it arrives
+	/// Sends OnSerialData(string data) message
 	/// </summary>
-	public int bufferLines = 0;
+	public bool NotifyData = false;
+
+	/// <summary>
+	/// Enable line detection and notification on received data.
+	/// Message OnSerialLine(string line) is sent for every received line
+	/// </summary>
+	public bool NotifyLines = false;
+
+	/// <summary>
+	/// Maximum number of lines to remember. Get them with GetLines() or GetLastLine()
+	/// </summary>
+	public int RememberLines = 0;
+
+	/// <summary>
+	/// Enable lines detection, values separation and notification.
+	/// Each line is split with the value separator (TAB by default)
+	/// Sends Message OnSerialValues(string [] values)
+	/// </summary>
+	public bool NotifyValues = false;
+
+	/// <summary>
+	/// The values separator.
+	/// </summary>
+	public char ValuesSeparator = '\t';
 
 	//string serialOut = "";
 	private List<string> linesIn = new List<string> ();
@@ -48,13 +84,13 @@ public class Serial : MonoBehaviour
 	/// Gets the received bytes count.
 	/// </summary>
 	/// <value>The received bytes count.</value>
-	static public int ReceivedBytesCount { get { return s_bufferIn.Length; } }
+	public int ReceivedBytesCount { get { return BufferIn.Length; } }
 
 	/// <summary>
 	/// Gets the received bytes.
 	/// </summary>
 	/// <value>The received bytes.</value>
-	static public string ReceivedBytes { get { return s_bufferIn; } }
+	public string ReceivedBytes { get { return BufferIn; } }
 
 	/// <summary>
 	/// Clears the received bytes. 
@@ -62,9 +98,9 @@ public class Serial : MonoBehaviour
 	/// To be used when no \n is expected to avoid keeping unnecessary big amount of data in memory
 	/// You should normally not call this function if \n are expected.
 	/// </summary>
-	static public void ClearReceivedBytes ()
+	public void ClearReceivedBytes ()
 	{
-		s_bufferIn = "";
+		BufferIn = "";
 	}
 
 	/// <summary>
@@ -73,13 +109,21 @@ public class Serial : MonoBehaviour
 	/// <value>The lines count.</value>
 	public int linesCount { get { return linesIn.Count; } }
 
+	#region Private vars
+
+	// buffer data as they arrive, until a new line is received
+	private string BufferIn = "";
+
+	#endregion
+
 	#region Static vars
+
 	// Only one serial port shared among all instances and living after all instances have been destroyed
 	private static SerialPort s_serial;
-	
-	// buffer data as they arrive, until a new line is received
-	private static string s_bufferIn = "";
+
+	// 
 	private static List<Serial> s_instances = new List<Serial> ();
+
 	#endregion
 
 	void Start ()
@@ -113,8 +157,8 @@ public class Serial : MonoBehaviour
 
 	void OnValidate ()
 	{
-		if (bufferLines < 0)
-			bufferLines = 0;
+		if (RememberLines < 0)
+			RememberLines = 0;
 	}
 
 	void OnEnable ()
@@ -166,40 +210,12 @@ public class Serial : MonoBehaviour
 
 					string serialIn = s_serial.ReadExisting ();
 
-					// prepend pending buffer to received data and split by line
-					string [] lines = (s_bufferIn + serialIn).Split ('\n');
-
-					// If last line is not empty, it means the line is not complete (new line did not arrive yet), 
-					// We keep it in buffer for next data.
-					int nLines = lines.Length;
-					s_bufferIn = lines [nLines - 1];
-
-					// Loop until the penultimate line (don't use the last one: either it is empty or it has already been saved for later)
-					for (int iLine = 0; iLine < nLines - 1; iLine++) {
-						string line = lines [iLine];
-						//print(line);
-
-						// Send new line to all instances
-						foreach (Serial inst in s_instances) {
-
-							// Buffer line
-							if (inst.bufferLines > 0) {
-								inst.linesIn.Add (line);
-
-								// trim lines buffer
-								int overflow = inst.linesIn.Count - inst.bufferLines;
-								if (overflow > 0) {
-									print ("Serial removing " + overflow + " lines from lines buffer");
-									inst.linesIn.RemoveRange (0, overflow);
-								}
-							}
-
-							// notify new line
-							inst.SendMessage ("OnSerialLine", line, SendMessageOptions.DontRequireReceiver);
-						}
+					// Dispatch new data to each instance
+					foreach (Serial inst in s_instances) {
+						inst.receivedData (serialIn);
 					}
-				}
 
+				}
 
 			} catch (System.Exception e) {
 				print ("System.Exception in serial.ReadLine: " + e.ToString ());
@@ -242,6 +258,57 @@ public class Serial : MonoBehaviour
 
 
 
+	}
+
+	// Data has been received, do what this instance has to do with it
+	protected void receivedData (string data)
+	{
+
+		if (NotifyData) {
+			SendMessage ("OnSerialData", data);
+		}
+
+		// Detect lines
+		if (NotifyLines || NotifyValues) {
+		
+			// prepend pending buffer to received data and split by line
+			string [] lines = (BufferIn + data).Split ('\n');
+			
+			// If last line is not empty, it means the line is not complete (new line did not arrive yet), 
+			// We keep it in buffer for next data.
+			int nLines = lines.Length;
+			BufferIn = lines [nLines - 1];
+			
+			// Loop until the penultimate line (don't use the last one: either it is empty or it has already been saved for later)
+			for (int iLine = 0; iLine < nLines - 1; iLine++) {
+				string line = lines [iLine];
+				//print(line);
+				
+				// Buffer line
+				if (RememberLines > 0) {
+					linesIn.Add (line);
+						
+					// trim lines buffer
+					int overflow = linesIn.Count - RememberLines;
+					if (overflow > 0) {
+						print ("Serial removing " + overflow + " lines from lines buffer. Either consume lines before they are lost or set RememberLines to 0.");
+						linesIn.RemoveRange (0, overflow);
+					}
+				}
+					
+				// notify new line
+				if (NotifyLines) {
+					SendMessage ("OnSerialLine", line);
+				}
+
+				// Notify values
+				if (NotifyValues) {
+					string [] values = line.Split (ValuesSeparator);
+					SendMessage ("OnSerialValues", values);
+				}
+
+			}
+		}
 	}
 
 	string GetPortName ()

@@ -51,7 +51,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 1
+  RememberLines: 0
+  NotifyValues: 0
 --- !u!132 &13200000
 GUIText:
   m_ObjectHideFlags: 1
@@ -65,7 +68,7 @@ GUIText:
   m_Alignment: 0
   m_PixelOffset: {x: 0, y: 0}
   m_LineSpacing: 1
-  m_TabSize: 4
+  m_TabSize: 60
   m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   m_Material: {fileID: 0}
   m_FontSize: 0

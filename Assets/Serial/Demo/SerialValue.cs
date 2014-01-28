@@ -4,13 +4,13 @@ using System.Collections;
 public class SerialValue : MonoBehaviour {
 
 	/// <summary>
-	/// The column from which to show the value.
+	/// The column (0 based) from which to show the value. 
 	/// </summary>
 	public int Column = 0;
 
-	void OnSerialValue(string value, int col) {
-		if (col == Column) {
-			guiText.text = "Last value [" + Column + "]: " + value;
+	void OnSerialValues(string[] values) {
+		if (Column < values.Length) {
+			guiText.text = "Last value [" + Column + "]: " + values[Column];
 		}
 	}
 }

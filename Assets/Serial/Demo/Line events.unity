@@ -93,22 +93,6 @@ Prefab:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_Name
       value: Last Value 0
@@ -161,7 +145,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 0
+  RememberLines: 0
+  NotifyValues: 1
 --- !u!132 &1073239303
 GUIText:
   m_ObjectHideFlags: 0
@@ -215,22 +202,6 @@ Prefab:
     - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_LocalPosition.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_Name
@@ -328,7 +299,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 0
+  RememberLines: 0
+  NotifyValues: 1
 --- !u!132 &1516296171
 GUIText:
   m_ObjectHideFlags: 0
@@ -382,22 +356,6 @@ Prefab:
     - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_LocalPosition.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_Name
@@ -483,22 +441,6 @@ Prefab:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 72db36994b04f401a8f2e1262572fb77, type: 2}
       propertyPath: m_Name
       value: Last Value 2
@@ -554,7 +496,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 1
+  RememberLines: 0
+  NotifyValues: 0
 --- !u!132 &1815524344
 GUIText:
   m_ObjectHideFlags: 0
@@ -569,7 +514,7 @@ GUIText:
   m_Alignment: 0
   m_PixelOffset: {x: 0, y: 0}
   m_LineSpacing: 1
-  m_TabSize: 4
+  m_TabSize: 60
   m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   m_Material: {fileID: 0}
   m_FontSize: 0
@@ -713,7 +658,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 0
+  RememberLines: 0
+  NotifyValues: 1
 --- !u!132 &2021558608
 GUIText:
   m_ObjectHideFlags: 0
@@ -792,7 +740,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 0
+  RememberLines: 0
+  NotifyValues: 1
 --- !u!132 &2070642678
 GUIText:
   m_ObjectHideFlags: 0

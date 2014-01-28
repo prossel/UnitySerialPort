@@ -52,7 +52,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f66c2cce04c1f4a21a3287582dde7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bufferLines: 0
+  NotifyData: 0
+  NotifyLines: 0
+  RememberLines: 0
+  NotifyValues: 1
 --- !u!132 &13200000
 GUIText:
   m_ObjectHideFlags: 1
