@@ -1,4 +1,26 @@
-﻿using UnityEngine;
+﻿/* This behavior helps sending and receiving data from a serial port. 
+ * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
+ * 
+ * Usage 1: (when you expect line breaks)
+ * 
+ * - drop this script to a gameObject
+ * - create a script on the same gameObject to receive new line notifications
+ * - add the OnSerialLine() function, here is an example
+ * 
+ * 	void OnSerialLine(string line) {
+ *		print "Got a line: " + line;
+ *	}
+ * 
+ * Usage 2: (when you don't expect line breaks)
+ * 
+ * - drop this script to a gameObject
+ * - from any script, use the static props ReceivedBytesCount, ReceivedBytes 
+ *   and don't forget to call ClearReceivedBytes() to avoid overflowing the buffer
+ * 
+ */
+
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -19,12 +41,31 @@ public class Serial : MonoBehaviour
 	/// </summary>
 	public int bufferLines = 0;
 
-	//private string serialIn = "";
 	//string serialOut = "";
 	private List<string> linesIn = new List<string> ();
 
-//	public int ReceivedBytesCount { get { return serialIn.Length; } }
-//	public string ReceivedBytes { get { return serialIn; } }
+	/// <summary>
+	/// Gets the received bytes count.
+	/// </summary>
+	/// <value>The received bytes count.</value>
+	static public int ReceivedBytesCount { get { return s_bufferIn.Length; } }
+
+	/// <summary>
+	/// Gets the received bytes.
+	/// </summary>
+	/// <value>The received bytes.</value>
+	static public string ReceivedBytes { get { return s_bufferIn; } }
+
+	/// <summary>
+	/// Clears the received bytes. 
+	/// Warning: This prevents line detection and notification. 
+	/// To be used when no \n is expected to avoid keeping unnecessary big amount of data in memory
+	/// You should normally not call this function if \n are expected.
+	/// </summary>
+	static public void ClearReceivedBytes ()
+	{
+		s_bufferIn = "";
+	}
 
 	/// <summary>
 	/// Gets the lines count.
@@ -106,7 +147,7 @@ public class Serial : MonoBehaviour
 		/*if(serial.IsOpen && serial != null) {
 
 			try {
-				serialIn = serial.ReadLine();
+				s_bufferIn = serial.ReadLine();
 			} catch(System.Exception) {
 
 			}
