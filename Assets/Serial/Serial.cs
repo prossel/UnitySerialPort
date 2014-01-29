@@ -2,7 +2,7 @@
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
  * 
- * Usage 1: (when you expect line breaks)
+ * Usage 1: Receive data when you expect line breaks
  * -------
  * 
  * - drop this script to a gameObject
@@ -13,12 +13,19 @@
  *		print "Got a line: " + line;
  *	}
  * 
- * Usage 2: (when you don't expect line breaks)
+ * Usage 2: Receive data (when you don't expect line breaks)
  * -------
  * 
  * - drop this script to a gameObject
  * - from any script, use the static props ReceivedBytesCount, ReceivedBytes 
  *   and don't forget to call ClearReceivedBytes() to avoid overflowing the buffer
+ * 
+ * Usage 3: Send data
+ * -------
+ * 
+ * - from any script, call the static functions Serial.write() or Serial.writeLn()
+ * - if not not already, the serial port will be opened automatically.
+ * 
  * 
  * Troubleshooting
  * ---------------
