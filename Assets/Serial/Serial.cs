@@ -128,28 +128,7 @@ public class Serial : MonoBehaviour
 
 	void Start ()
 	{
-
-		if (s_serial == null) {
-
-			string portName = GetPortName ();
-
-			if (portName == "") {
-				print ("Error: Couldn't find serial port.");
-				return;
-			} else {
-				//print("Opening serial port: " + portName);
-			}
-
-			s_serial = new SerialPort (portName, 9600);
-
-			s_serial.Open ();
-			//print ("default ReadTimeout: " + serial.ReadTimeout);
-			//serial.ReadTimeout = 10;
-
-			// cler input buffer from previous garbage
-			s_serial.DiscardInBuffer ();
-
-		}
+		checkOpen (9600);
 
 		// Each instance has its own coroutine but only one will be active a 
 		StartCoroutine (ReadSerialLoop ());
@@ -253,13 +232,51 @@ public class Serial : MonoBehaviour
 		return line;
 	}
 
-	public void Write (string message, bool overwriteCurrentValue=true)
+	public void Write (string message)
 	{
+		if (checkOpen())
+			s_serial.Write(message);
+	}
+	
 
-
-
+	public void WriteLn (string message)
+	{
+		if (s_serial != null && s_serial.IsOpen)
+			s_serial.Write(message);
 	}
 
+
+	/// <summary>
+	/// Verify if the serial port is opened and opens it if necessary
+	/// </summary>
+	/// <returns><c>true</c>, if port is opened, <c>false</c> otherwise.</returns>
+	/// <param name="portSpeed">Port speed.</param>
+	public bool checkOpen(int portSpeed = 9600) {
+
+		if (s_serial == null) {
+			
+			string portName = GetPortName ();
+			
+			if (portName == "") {
+				print ("Error: Couldn't find serial port.");
+				return false;
+			} else {
+				//print("Opening serial port: " + portName);
+			}
+			
+			s_serial = new SerialPort (portName, portSpeed);
+			
+			s_serial.Open ();
+			//print ("default ReadTimeout: " + serial.ReadTimeout);
+			//serial.ReadTimeout = 10;
+			
+			// cler input buffer from previous garbage
+			s_serial.DiscardInBuffer ();
+		}
+
+		return s_serial.IsOpen;
+	}
+	
 	// Data has been received, do what this instance has to do with it
 	protected void receivedData (string data)
 	{
