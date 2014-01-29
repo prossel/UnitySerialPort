@@ -232,14 +232,14 @@ public class Serial : MonoBehaviour
 		return line;
 	}
 
-	public void Write (string message)
+	public static void Write (string message)
 	{
 		if (checkOpen())
 			s_serial.Write(message);
 	}
 	
 
-	public void WriteLn (string message)
+	public static void WriteLn (string message = "")
 	{
 		if (s_serial != null && s_serial.IsOpen)
 			s_serial.Write(message);
@@ -251,7 +251,7 @@ public class Serial : MonoBehaviour
 	/// </summary>
 	/// <returns><c>true</c>, if port is opened, <c>false</c> otherwise.</returns>
 	/// <param name="portSpeed">Port speed.</param>
-	public bool checkOpen(int portSpeed = 9600) {
+	public static bool checkOpen(int portSpeed = 9600) {
 
 		if (s_serial == null) {
 			
@@ -328,7 +328,7 @@ public class Serial : MonoBehaviour
 		}
 	}
 
-	string GetPortName ()
+	static string GetPortName ()
 	{
 
 		string[] portNames;
