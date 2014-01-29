@@ -38,7 +38,6 @@
  * 
  * Author: Pierre Rossel, 2014-01-28
  */
-
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -121,6 +120,8 @@ public class Serial : MonoBehaviour
 	// buffer data as they arrive, until a new line is received
 	private string BufferIn = "";
 
+	// flag to detect whether coroutine is still running to workaround coroutine being stopped after saving scripts while running in Unity
+	private bool CoroutineRunning = false;
 	#endregion
 
 	#region Static vars
@@ -135,10 +136,7 @@ public class Serial : MonoBehaviour
 
 	void Start ()
 	{
-		checkOpen (9600);
-
-		// Each instance has its own coroutine but only one will be active a 
-		StartCoroutine (ReadSerialLoop ());
+		// print ("Serial Start ");
 	}
 
 	void OnValidate ()
@@ -149,11 +147,18 @@ public class Serial : MonoBehaviour
 
 	void OnEnable ()
 	{
-		s_instances.Add (this);
+//		print("Serial OnEnable");
+//		if (s_serial != null)
+//			print ("serial IsOpen: " + s_serial.IsOpen);
+//		else
+//			print ("no serial: ");
+
+		s_instances.Add (this); 
 	}
 
 	void OnDisable ()
 	{
+		//print("Serial OnDisable");
 		s_instances.Remove (this);
 	}
 
@@ -173,24 +178,29 @@ public class Serial : MonoBehaviour
 
 	void Update ()
 	{
+		//print ("Serial Update");
 
-		/*if(serial.IsOpen && serial != null) {
+		if (!CoroutineRunning) {
+			if (checkOpen (9600)) {
+				
+				// print ("starting ReadSerialLoop coroutine");
 
-			try {
-				s_bufferIn = serial.ReadLine();
-			} catch(System.Exception) {
-
+				// Each instance has its own coroutine but only one will be active a 
+				StartCoroutine (ReadSerialLoop ());
 			}
-
-		}*/
-
+		}
+		else
+			CoroutineRunning = false;
 	}
 
 	public IEnumerator ReadSerialLoop ()
 	{
 
 		while (true) {
-			
+
+			//print("ReadSerialLoop ");
+			CoroutineRunning = true;
+
 			try {
 				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
 
@@ -209,6 +219,7 @@ public class Serial : MonoBehaviour
 			
 			yield return null;
 		}
+
 	}
 
 	/// return all received lines and clear them
@@ -241,15 +252,14 @@ public class Serial : MonoBehaviour
 
 	public static void Write (string message)
 	{
-		if (checkOpen())
-			s_serial.Write(message);
+		if (checkOpen ())
+			s_serial.Write (message);
 	}
-	
 
 	public static void WriteLn (string message = "")
 	{
 		if (s_serial != null && s_serial.IsOpen)
-			s_serial.Write(message);
+			s_serial.Write (message);
 	}
 
 
@@ -258,7 +268,8 @@ public class Serial : MonoBehaviour
 	/// </summary>
 	/// <returns><c>true</c>, if port is opened, <c>false</c> otherwise.</returns>
 	/// <param name="portSpeed">Port speed.</param>
-	public static bool checkOpen(int portSpeed = 9600) {
+	public static bool checkOpen (int portSpeed = 9600)
+	{
 
 		if (s_serial == null) {
 			
