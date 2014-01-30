@@ -1,4 +1,6 @@
 ﻿/* 
+ * Version 0.2.2, 2014-01-30, Pierre Rossel
+ * 
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
  * 
@@ -36,8 +38,8 @@
  * Solution: 
  *     File | Build Settings | Optimization | API Compatibility Level: .Net 2.0
  * 
- * Author: Pierre Rossel, 2014-01-28
  */
+
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -121,7 +123,7 @@ public class Serial : MonoBehaviour
 	private string BufferIn = "";
 
 	// flag to detect whether coroutine is still running to workaround coroutine being stopped after saving scripts while running in Unity
-	private bool CoroutineRunning = false;
+	private int nCoroutineRunning = 0;
 	#endregion
 
 	#region Static vars
@@ -153,7 +155,10 @@ public class Serial : MonoBehaviour
 //		else
 //			print ("no serial: ");
 
-		s_instances.Add (this); 
+		s_instances.Add (this);
+
+		checkOpen (9600);
+
 	}
 
 	void OnDisable ()
@@ -180,17 +185,20 @@ public class Serial : MonoBehaviour
 	{
 		//print ("Serial Update");
 
-		if (!CoroutineRunning) {
-			if (checkOpen (9600)) {
-				
-				// print ("starting ReadSerialLoop coroutine");
+		if (s_serial != null && s_serial.IsOpen) {
+			if (nCoroutineRunning == 0) {
+					
+				//print ("starting ReadSerialLoop coroutine");
 
 				// Each instance has its own coroutine but only one will be active a 
 				StartCoroutine (ReadSerialLoop ());
+			} else {
+				if (nCoroutineRunning > 1)
+					print (nCoroutineRunning + " coroutines in " + name);
+
+				nCoroutineRunning = 0; 
 			}
 		}
-		else
-			CoroutineRunning = false;
 	}
 
 	public IEnumerator ReadSerialLoop ()
@@ -198,8 +206,13 @@ public class Serial : MonoBehaviour
 
 		while (true) {
 
+			if (!enabled) {
+				//print ("behaviour not enabled, stopping coroutine");
+				yield break; 
+			}
+
 			//print("ReadSerialLoop ");
-			CoroutineRunning = true;
+			nCoroutineRunning++; 
 
 			try {
 				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
@@ -279,7 +292,7 @@ public class Serial : MonoBehaviour
 				print ("Error: Couldn't find serial port.");
 				return false;
 			} else {
-				//print("Opening serial port: " + portName);
+				//print ("Opening serial port: " + portName);
 			}
 			
 			s_serial = new SerialPort (portName, portSpeed);
