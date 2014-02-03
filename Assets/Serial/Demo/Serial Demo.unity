@@ -153,6 +153,7 @@ MonoBehaviour:
   NotifyLines: 0
   RememberLines: 0
   NotifyValues: 1
+  EnableDebugInfos: 0
 --- !u!132 &1073239303
 GUIText:
   m_ObjectHideFlags: 0
@@ -263,6 +264,10 @@ Prefab:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11400002, guid: 5d933a02b235a4e2db6b5772374384c3, type: 2}
+      propertyPath: EnableDebugInfos
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5d933a02b235a4e2db6b5772374384c3, type: 2}
   m_RootGameObject: {fileID: 1815524341}
@@ -315,6 +320,7 @@ MonoBehaviour:
   NotifyLines: 0
   RememberLines: 0
   NotifyValues: 1
+  EnableDebugInfos: 0
 --- !u!132 &1516296171
 GUIText:
   m_ObjectHideFlags: 0
@@ -520,6 +526,7 @@ MonoBehaviour:
   NotifyLines: 1
   RememberLines: 0
   NotifyValues: 0
+  EnableDebugInfos: 1
 --- !u!132 &1815524344
 GUIText:
   m_ObjectHideFlags: 0
@@ -694,6 +701,7 @@ MonoBehaviour:
   NotifyLines: 0
   RememberLines: 0
   NotifyValues: 1
+  EnableDebugInfos: 0
 --- !u!132 &2021558608
 GUIText:
   m_ObjectHideFlags: 0
@@ -776,6 +784,7 @@ MonoBehaviour:
   NotifyLines: 0
   RememberLines: 0
   NotifyValues: 1
+  EnableDebugInfos: 0
 --- !u!132 &2070642678
 GUIText:
   m_ObjectHideFlags: 0

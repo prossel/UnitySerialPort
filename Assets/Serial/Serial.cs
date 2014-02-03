@@ -1,5 +1,5 @@
 ﻿/* 
- * Version 0.2.2, 2014-01-30, Pierre Rossel
+ * Version 0.3.0, 2014-02-03, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
@@ -9,6 +9,7 @@
  * 
  * - drop this script to a gameObject
  * - create a script on the same gameObject to receive new line notifications
+ * - select "Notify Lines" checkbox on Serial script
  * - add the OnSerialLine() function, here is an example
  * 
  * 	void OnSerialLine(string line) {
@@ -25,7 +26,7 @@
  * Usage 3: Send data
  * -------
  * 
- * - from any script, call the static functions Serial.write() or Serial.writeLn()
+ * - from any script, call the static functions Serial.Write() or Serial.WriteLn()
  * - if not not already, the serial port will be opened automatically.
  * 
  * 
@@ -85,6 +86,14 @@ public class Serial : MonoBehaviour
 	/// </summary>
 	public char ValuesSeparator = '\t';
 
+	/// <summary>
+	/// The enable debug infos.
+	/// The first script with debug infos enabled will enable them until the program stop. 
+	/// Therefore, only one script need to enable the debug info to have them in all app, even with multiple scene
+	/// and multiple instances, until the program stops.
+	/// </summary>
+	public bool EnableDebugInfos = false;
+
 	//string serialOut = "";
 	private List<string> linesIn = new List<string> ();
 
@@ -133,6 +142,12 @@ public class Serial : MonoBehaviour
 
 	// 
 	private static List<Serial> s_instances = new List<Serial> ();
+	
+	// Enable debug info
+	private static bool s_debug = false; // Do not change here. Use EnableDebugInfo on any script instance
+	
+	private static float s_lastDataIn = 0;
+	private static float s_lastDataCheck = 0;
 
 	#endregion
 
@@ -156,6 +171,11 @@ public class Serial : MonoBehaviour
 //			print ("no serial: ");
 
 		s_instances.Add (this);
+
+		if (EnableDebugInfos && !s_debug) {
+			Debug.LogWarning("Serial debug informations enabled by " + this);
+			s_debug = true;
+		}
 
 		checkOpen (9600);
 
@@ -215,6 +235,8 @@ public class Serial : MonoBehaviour
 			nCoroutineRunning++; 
 
 			try {
+				s_lastDataCheck = Time.time;
+
 				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
 
 					string serialIn = s_serial.ReadExisting ();
@@ -224,6 +246,7 @@ public class Serial : MonoBehaviour
 						inst.receivedData (serialIn);
 					}
 
+					s_lastDataIn = s_lastDataCheck;
 				}
 
 			} catch (System.Exception e) {
@@ -292,7 +315,8 @@ public class Serial : MonoBehaviour
 				print ("Error: Couldn't find serial port.");
 				return false;
 			} else {
-				//print ("Opening serial port: " + portName);
+				if (s_debug)
+					print("Opening serial port: " + portName);
 			}
 			
 			s_serial = new SerialPort (portName, portSpeed);
@@ -391,9 +415,15 @@ public class Serial : MonoBehaviour
 				return portNames [0];
 			else
 				return "COM3";
-
 		}
+	}
 
+	void OnGUI() {
+
+		// Show debug only if enabled and by the first instance to avoid overwrite same data
+		if (s_debug && this == s_instances[0]) {
+			GUILayout.Label("Serial last data: " + s_lastDataIn + " (last check: " + s_lastDataCheck + ")");
+		}
 	}
 
 }
