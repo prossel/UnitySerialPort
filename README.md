@@ -10,7 +10,9 @@ It detects line breaks and notifies the attached gameObject of new lines as they
 
 # Install
 
-Download the latest [package](https://github.com/prossel/UnitySerialPort/blob/master/UnitySerialPort.unitypackage) and import in your project. (Click the package link and then the Raw button to download the package)
+Download the latest [package](https://github.com/prossel/UnitySerialPort/raw/master/UnitySerialPort.unitypackage) and import in your project.
+
+You do not need to clone or download the entire project unless you want to modify it (and then make a pull request).
 
 # How to use
 
