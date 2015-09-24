@@ -10,7 +10,7 @@ It detects line breaks and notifies the attached gameObject of new lines as they
 
 # Install
 
-Download the latest [package](https://github.com/prossel/UnitySerialPort/blob/master/UnitySerialPort.unitypackage) and import in your project.
+Download the latest [package](https://github.com/prossel/UnitySerialPort/blob/master/UnitySerialPort.unitypackage) and import in your project. (Click the package link and then the Raw button to download the package)
 
 # How to use
 
@@ -50,6 +50,9 @@ You may get the following error:
 
 Solution:
 
+Edit | Project Settings | Player | PC, Mac & Linux Standalone settings | Other Settings |  Optimization | API Compatibility Level: .Net 2.0
+
+In some older version of Unity, you would find this option in:
 File | Build Settings | Optimization | API Compatibility Level: .Net 2.0
 
 ## The script does not work under Windows
