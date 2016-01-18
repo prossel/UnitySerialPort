@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Version 0.2.2, 2014-01-30, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
@@ -190,8 +190,24 @@ public class Serial : MonoBehaviour
 					
 				//print ("starting ReadSerialLoop coroutine");
 
-				// Each instance has its own coroutine but only one will be active a 
-				StartCoroutine (ReadSerialLoop ());
+				switch (Application.platform) {
+					
+				case RuntimePlatform.WindowsEditor:
+				case RuntimePlatform.WindowsPlayer:
+				case RuntimePlatform.WindowsWebPlayer:
+
+					s_serial.ReadTimeout = 1;
+
+					// Each instance has its own coroutine but only one will be active
+					StartCoroutine (ReadSerialLoopWin ());
+					break;
+					
+				default:
+					// Each instance has its own coroutine but only one will be active
+					StartCoroutine (ReadSerialLoop ());
+					break;
+					
+				}
 			} else {
 				if (nCoroutineRunning > 1)
 					print (nCoroutineRunning + " coroutines in " + name);
@@ -233,6 +249,51 @@ public class Serial : MonoBehaviour
 			yield return null;
 		}
 
+	}
+
+	public IEnumerator ReadSerialLoopWin ()
+	{
+		
+		while (true) {
+			
+			if (!enabled) {
+				//print ("behaviour not enabled, stopping coroutine");
+				yield break; 
+			}
+			
+			//print("ReadSerialLoop ");
+			nCoroutineRunning++; 
+			
+			string serialIn = "";
+			try {
+				while (true) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
+					char c = (char)s_serial.ReadByte();
+					if (c == '\n')
+						break;
+					else
+						serialIn += c;
+
+					//serialIn += s_serial.ReadLine();
+				}
+				
+			} catch (System.TimeoutException) {
+				//print ("System.TimeoutException in serial.ReadLine: " + te.ToString ());
+			} catch (System.Exception e) {
+				print ("System.Exception in serial.ReadLine: " + e.ToString ());
+			}
+
+			if (serialIn.Length > 0) {
+				
+				Debug.Log("just read some data: " + serialIn);
+				// Dispatch new data to each instance
+				foreach (Serial inst in s_instances) {
+					inst.receivedData (serialIn);
+				}
+			}
+
+			yield return null;
+		}
+		
 	}
 
 	/// return all received lines and clear them
@@ -292,7 +353,7 @@ public class Serial : MonoBehaviour
 				print ("Error: Couldn't find serial port.");
 				return false;
 			} else {
-				//print ("Opening serial port: " + portName);
+				print ("Opening serial port: " + portName);
 			}
 			
 			s_serial = new SerialPort (portName, portSpeed);
@@ -381,16 +442,15 @@ public class Serial : MonoBehaviour
 				if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 					return portName;
 			}                
-			return ""; 
+			return "";
 
 		default: // Windows
 
 			portNames = System.IO.Ports.SerialPort.GetPortNames ();
-				    
 			if (portNames.Length > 0)
 				return portNames [0];
 			else
-				return "COM3";
+				return "";
 
 		}
 
