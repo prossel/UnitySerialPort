@@ -56,7 +56,3 @@ Edit | Project Settings | Player | PC, Mac & Linux Standalone settings | Other S
 
 In some older version of Unity, you would find this option in:
 File | Build Settings | Optimization | API Compatibility Level: .Net 2.0
-
-## The script does not work under Windows
-
-If you happen to read this and face the Windows problem, there is already an [issue](https://github.com/prossel/UnitySerialPort/issues/1)
