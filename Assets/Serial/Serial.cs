@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * Version 0.3.0, 2014-02-03, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
@@ -210,8 +210,24 @@ public class Serial : MonoBehaviour
 					
 				//print ("starting ReadSerialLoop coroutine");
 
-				// Each instance has its own coroutine but only one will be active a 
-				StartCoroutine (ReadSerialLoop ());
+				switch (Application.platform) {
+					
+				case RuntimePlatform.WindowsEditor:
+				case RuntimePlatform.WindowsPlayer:
+				case RuntimePlatform.WindowsWebPlayer:
+
+					s_serial.ReadTimeout = 1;
+
+					// Each instance has its own coroutine but only one will be active
+					StartCoroutine (ReadSerialLoopWin ());
+					break;
+					
+				default:
+					// Each instance has its own coroutine but only one will be active
+					StartCoroutine (ReadSerialLoop ());
+					break;
+					
+				}
 			} else {
 				if (nCoroutineRunning > 1)
 					print (nCoroutineRunning + " coroutines in " + name);
@@ -236,8 +252,8 @@ public class Serial : MonoBehaviour
 
 			try {
 				s_lastDataCheck = Time.time;
+				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine or ReadByte in a Thread or Coroutine
 
-				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
 
 					string serialIn = s_serial.ReadExisting ();
 
@@ -250,12 +266,55 @@ public class Serial : MonoBehaviour
 				}
 
 			} catch (System.Exception e) {
-				print ("System.Exception in serial.ReadLine: " + e.ToString ());
+				print ("System.Exception in serial.ReadExisting: " + e.ToString ());
 			}
 			
 			yield return null;
 		}
 
+	}
+
+	public IEnumerator ReadSerialLoopWin ()
+	{
+		
+		while (true) {
+			
+			if (!enabled) {
+				//print ("behaviour not enabled, stopping coroutine");
+				yield break; 
+			}
+			
+			//print("ReadSerialLoopWin ");
+			nCoroutineRunning++; 
+			//print ("nCoroutineRunning: " + nCoroutineRunning);
+			
+			string serialIn = "";
+			try {
+				while (true) {  // BytesToRead crashes on Windows -> use ReadLine or ReadByte in a Thread or Coroutine
+					char c = (char)s_serial.ReadByte();
+					serialIn += c;
+
+					//serialIn += s_serial.ReadLine();
+				}
+				
+			} catch (System.TimeoutException) {
+				//print ("System.TimeoutException in serial.ReadLine: " + te.ToString ());
+			} catch (System.Exception e) {
+				print ("System.Exception in serial.ReadLine: " + e.ToString ());
+			}
+
+			if (serialIn.Length > 0) {
+				
+				//Debug.Log("just read some data: " + serialIn);
+				// Dispatch new data to each instance
+				foreach (Serial inst in s_instances) {
+					inst.receivedData (serialIn);
+				}
+			}
+
+			yield return null;
+		}
+		
 	}
 
 	/// return all received lines and clear them
@@ -322,10 +381,10 @@ public class Serial : MonoBehaviour
 			s_serial = new SerialPort (portName, portSpeed);
 			
 			s_serial.Open ();
-			//print ("default ReadTimeout: " + serial.ReadTimeout);
-			//serial.ReadTimeout = 10;
+			//print ("default ReadTimeout: " + s_serial.ReadTimeout);
+			//s_serial.ReadTimeout = 10;
 			
-			// cler input buffer from previous garbage
+			// clear input buffer from previous garbage
 			s_serial.DiscardInBuffer ();
 		}
 
@@ -354,8 +413,8 @@ public class Serial : MonoBehaviour
 			// Loop until the penultimate line (don't use the last one: either it is empty or it has already been saved for later)
 			for (int iLine = 0; iLine < nLines - 1; iLine++) {
 				string line = lines [iLine];
-				//print(line);
-				
+				//Debug.Log ("Received a line: " + line);
+
 				// Buffer line
 				if (RememberLines > 0) {
 					linesIn.Add (line);
@@ -405,16 +464,17 @@ public class Serial : MonoBehaviour
 				if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 					return portName;
 			}                
-			return ""; 
+			return "";
 
 		default: // Windows
 
 			portNames = System.IO.Ports.SerialPort.GetPortNames ();
-				    
+
+			// Defaults to last port in list (most chance to be an Arduino port)
 			if (portNames.Length > 0)
-				return portNames [0];
+				return portNames [portNames.Length - 1];
 			else
-				return "COM3";
+				return "";
 		}
 	}
 

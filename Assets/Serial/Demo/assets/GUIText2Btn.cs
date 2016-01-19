@@ -22,15 +22,15 @@ public class GUIText2Btn : MonoBehaviour
 		GUIStyle guiStyle = new GUIStyle ("button");
 
 		// Get as much style as possible from placeholder GUIText
-		guiStyle.fontStyle = gameObject.guiText.fontStyle;
-		guiStyle.font = gameObject.guiText.font; 
-		guiStyle.fontSize = gameObject.guiText.fontSize; 
+		guiStyle.fontStyle = gameObject.GetComponent<GUIText>().fontStyle;
+		guiStyle.font = gameObject.GetComponent<GUIText>().font; 
+		guiStyle.fontSize = gameObject.GetComponent<GUIText>().fontSize; 
 		guiStyle.margin = new RectOffset (10, 10, 10, 10);
 
-		GUI.color = gameObject.guiText.color;
+		GUI.color = gameObject.GetComponent<GUIText>().color;
 
 		// Size the button
-		Rect rect = gameObject.guiText.GetScreenRect ();
+		Rect rect = gameObject.GetComponent<GUIText>().GetScreenRect ();
 
 		rect.y = Screen.height - rect.y - rect.height;
 		//rect.x += 200;
@@ -40,7 +40,7 @@ public class GUIText2Btn : MonoBehaviour
 		rect.width += 20;
 		rect.height += 20;
 
-		if (GUI.Button (rect, gameObject.guiText.text, guiStyle)) {
+		if (GUI.Button (rect, gameObject.GetComponent<GUIText>().text, guiStyle)) {
 			if (onClickLoadScene != null)
 				Application.LoadLevel (onClickLoadScene);
 

@@ -10,7 +10,7 @@ public class SerialValue : MonoBehaviour {
 
 	void OnSerialValues(string[] values) {
 		if (Column < values.Length) {
-			guiText.text = "Last value [" + Column + "]: " + values[Column];
+			GetComponent<GUIText>().text = "Last value [" + Column + "]: " + values[Column];
 		}
 	}
 }
