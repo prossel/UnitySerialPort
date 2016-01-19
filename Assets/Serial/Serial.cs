@@ -1,5 +1,5 @@
 /* 
- * Version 0.3.0, 2014-02-03, Pierre Rossel
+ * Version 0.3.1, 2016-01-19, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
@@ -357,6 +357,23 @@ public class Serial : MonoBehaviour
 			s_serial.Write (message);
 	}
 
+	/// <summary>
+	/// Act as if the serial port has received data followed by a new line.
+	/// </summary>
+	public void SimulateDataReceptionLn(float data) {
+		foreach (Serial inst in s_instances) {
+			inst.receivedData(data + "\n");
+		}
+	}
+
+	/// <summary>
+	/// Act as if the serial port has received data followed by a new line.
+	/// </summary>
+	public void SimulateDataReceptionLn(string data) {
+		foreach (Serial inst in s_instances) {
+			inst.receivedData(data + "\n");
+		}
+	}
 
 	/// <summary>
 	/// Verify if the serial port is opened and opens it if necessary
