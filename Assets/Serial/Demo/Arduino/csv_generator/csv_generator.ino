@@ -1,7 +1,7 @@
 // Generate 4 values from 0 to 9999 and send them to the serial port
 // Values are separated by a TAB and sets are separated by a new line 
 
-String version = "1.2 / 2014-02-03 by Pierre Rossel";
+String version = "1.3 / 2016-01-19 by Pierre Rossel";
 
 #define LED 13
 
@@ -9,7 +9,7 @@ int frame = 0;
 
 // See showHelp() for available modes doc
 typedef enum {
-  AUTO, ECHO
+  STOP, AUTO, ECHO
 } 
 Mode;
 
@@ -100,7 +100,10 @@ void loop() {
       // try to interpret command
       String action = token(cmd, 0);
 
-      if (action == "auto") {
+      if (action == "stop") {
+        mode = STOP;
+      }
+      else if (action == "auto") {
         mode = AUTO;
         String period = token(cmd, 1);
         if (period.length() > 0)
@@ -114,6 +117,11 @@ void loop() {
         Serial.println(version);
       else if (action == "help") {
         showHelp();
+      }
+      else {
+        if (mode != ECHO) {
+          Serial.println("Unknown command"); 
+        }
       }
 
       cmd = "";
@@ -185,23 +193,25 @@ void toggleLed() {
 }
 
 void showHelp() {
-  Serial.println("");
+  Serial.println();
   Serial.println("CSV Generator " + version);
-  Serial.println("Available commands:");
-  Serial.println("auto [period]");
-  Serial.println("    Sends continuously 4 int values separated by \\t and terminated by \\n.");
-  Serial.println("    This is the default mode.");
-  Serial.println("    period (optional): delay [ms] between each line sending.");
-  Serial.println("echo");
-  Serial.println("    Sends back whatever it receives on its serial port.");
-  Serial.println("reset");
-  Serial.println("    Resets the frame count (the first value in auto mode).");
-  Serial.println("version");
-  Serial.println("    Sends version information.");
-  Serial.println("help");
-  Serial.println("    Shows help.");
-  Serial.println("");
-
+  Serial.println();
+  Serial.println(F("Available commands:"));
+  Serial.println(F("auto [period]"));
+  Serial.println(F("    Sends continuously 4 int values separated by \\t and terminated by \\n."));
+  Serial.println(F("    This is the default mode."));
+  Serial.println(F("    period (optional): delay [ms] between each line sending."));
+  Serial.println(F("stop"));
+  Serial.println(F("    Stop sending data or echo mode."));
+  Serial.println(F("echo"));
+  Serial.println(F("    Sends back whatever it receives on its serial port."));
+  Serial.println(F("reset"));
+  Serial.println(F("    Resets the frame count (the first value in auto mode)."));
+  Serial.println(F("version"));
+  Serial.println(F("    Sends version information."));
+  Serial.println(F("help"));
+  Serial.println(F("    Shows help."));
+  Serial.println(F(""));
 }
 
 
