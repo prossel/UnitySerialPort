@@ -231,7 +231,7 @@ public class Serial : MonoBehaviour
 			nCoroutineRunning++; 
 
 			try {
-				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
+				while (s_serial.BytesToRead > 0) {  // BytesToRead crashes on Windows -> use ReadLine or ReadByte in a Thread or Coroutine
 
 					string serialIn = s_serial.ReadExisting ();
 
@@ -243,7 +243,7 @@ public class Serial : MonoBehaviour
 				}
 
 			} catch (System.Exception e) {
-				print ("System.Exception in serial.ReadLine: " + e.ToString ());
+				print ("System.Exception in serial.ReadExisting: " + e.ToString ());
 			}
 			
 			yield return null;
@@ -261,17 +261,15 @@ public class Serial : MonoBehaviour
 				yield break; 
 			}
 			
-			//print("ReadSerialLoop ");
+			//print("ReadSerialLoopWin ");
 			nCoroutineRunning++; 
+			//print ("nCoroutineRunning: " + nCoroutineRunning);
 			
 			string serialIn = "";
 			try {
-				while (true) {  // BytesToRead crashes on Windows -> use ReadLine in a Thread
+				while (true) {  // BytesToRead crashes on Windows -> use ReadLine or ReadByte in a Thread or Coroutine
 					char c = (char)s_serial.ReadByte();
-					if (c == '\n')
-						break;
-					else
-						serialIn += c;
+					serialIn += c;
 
 					//serialIn += s_serial.ReadLine();
 				}
@@ -284,7 +282,7 @@ public class Serial : MonoBehaviour
 
 			if (serialIn.Length > 0) {
 				
-				Debug.Log("just read some data: " + serialIn);
+				//Debug.Log("just read some data: " + serialIn);
 				// Dispatch new data to each instance
 				foreach (Serial inst in s_instances) {
 					inst.receivedData (serialIn);
@@ -359,10 +357,10 @@ public class Serial : MonoBehaviour
 			s_serial = new SerialPort (portName, portSpeed);
 			
 			s_serial.Open ();
-			//print ("default ReadTimeout: " + serial.ReadTimeout);
-			//serial.ReadTimeout = 10;
+			//print ("default ReadTimeout: " + s_serial.ReadTimeout);
+			//s_serial.ReadTimeout = 10;
 			
-			// cler input buffer from previous garbage
+			// clear input buffer from previous garbage
 			s_serial.DiscardInBuffer ();
 		}
 
@@ -391,8 +389,8 @@ public class Serial : MonoBehaviour
 			// Loop until the penultimate line (don't use the last one: either it is empty or it has already been saved for later)
 			for (int iLine = 0; iLine < nLines - 1; iLine++) {
 				string line = lines [iLine];
-				//print(line);
-				
+				//Debug.Log ("Received a line: " + line);
+
 				// Buffer line
 				if (RememberLines > 0) {
 					linesIn.Add (line);
@@ -447,8 +445,10 @@ public class Serial : MonoBehaviour
 		default: // Windows
 
 			portNames = System.IO.Ports.SerialPort.GetPortNames ();
+
+			// Defaults to last port in list (most chance to be an Arduino port)
 			if (portNames.Length > 0)
-				return portNames [0];
+				return portNames [portNames.Length - 1];
 			else
 				return "";
 
