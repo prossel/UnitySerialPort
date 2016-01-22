@@ -6,6 +6,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class GUIText2Btn : MonoBehaviour
@@ -42,7 +43,7 @@ public class GUIText2Btn : MonoBehaviour
 
 		if (GUI.Button (rect, gameObject.GetComponent<GUIText>().text, guiStyle)) {
 			if (onClickLoadScene != null)
-				Application.LoadLevel (onClickLoadScene);
+				SceneManager.LoadScene (onClickLoadScene);
 
 			GameObject target = MessageTarget;
 			if (target == null)
