@@ -1,5 +1,5 @@
 /* 
- * Version 0.3.1, 2016-01-19, Pierre Rossel
+ * Version 0.3.2, 2016-01-22, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
@@ -64,6 +64,14 @@ public class Serial : MonoBehaviour
 	public bool NotifyData = false;
 
 	/// <summary>
+	/// Discard all received data until first line.
+	/// Do not enable if you do not expect a \n as 
+	/// this would prevent the notification of any line or value.
+	/// Data notification is not impacted by this parameter.
+	/// </summary>
+	public bool SkipFirstLine = false;
+
+	/// <summary>
 	/// Enable line detection and notification on received data.
 	/// Message OnSerialLine(string line) is sent for every received line
 	/// </summary>
@@ -93,6 +101,11 @@ public class Serial : MonoBehaviour
 	/// and multiple instances, until the program stops.
 	/// </summary>
 	public bool EnableDebugInfos = false;
+
+	/// <summary>
+	/// The first line has been received.
+	/// </summary>
+	bool FirstLineReceived = false;
 
 	//string serialOut = "";
 	private List<string> linesIn = new List<string> ();
@@ -142,10 +155,10 @@ public class Serial : MonoBehaviour
 
 	// 
 	private static List<Serial> s_instances = new List<Serial> ();
-	
+
 	// Enable debug info
 	private static bool s_debug = false; // Do not change here. Use EnableDebugInfo on any script instance
-	
+
 	private static float s_lastDataIn = 0;
 	private static float s_lastDataCheck = 0;
 
@@ -164,11 +177,11 @@ public class Serial : MonoBehaviour
 
 	void OnEnable ()
 	{
-//		print("Serial OnEnable");
-//		if (s_serial != null)
-//			print ("serial IsOpen: " + s_serial.IsOpen);
-//		else
-//			print ("no serial: ");
+		//		print("Serial OnEnable");
+		//		if (s_serial != null)
+		//			print ("serial IsOpen: " + s_serial.IsOpen);
+		//		else
+		//			print ("no serial: ");
 
 		s_instances.Add (this);
 
@@ -207,11 +220,11 @@ public class Serial : MonoBehaviour
 
 		if (s_serial != null && s_serial.IsOpen) {
 			if (nCoroutineRunning == 0) {
-					
+
 				//print ("starting ReadSerialLoop coroutine");
 
 				switch (Application.platform) {
-					
+
 				case RuntimePlatform.WindowsEditor:
 				case RuntimePlatform.WindowsPlayer:
 				case RuntimePlatform.WindowsWebPlayer:
@@ -221,12 +234,12 @@ public class Serial : MonoBehaviour
 					// Each instance has its own coroutine but only one will be active
 					StartCoroutine (ReadSerialLoopWin ());
 					break;
-					
+
 				default:
 					// Each instance has its own coroutine but only one will be active
 					StartCoroutine (ReadSerialLoop ());
 					break;
-					
+
 				}
 			} else {
 				if (nCoroutineRunning > 1)
@@ -268,7 +281,7 @@ public class Serial : MonoBehaviour
 			} catch (System.Exception e) {
 				print ("System.Exception in serial.ReadExisting: " + e.ToString ());
 			}
-			
+
 			yield return null;
 		}
 
@@ -276,18 +289,18 @@ public class Serial : MonoBehaviour
 
 	public IEnumerator ReadSerialLoopWin ()
 	{
-		
+
 		while (true) {
-			
+
 			if (!enabled) {
 				//print ("behaviour not enabled, stopping coroutine");
 				yield break; 
 			}
-			
+
 			//print("ReadSerialLoopWin ");
 			nCoroutineRunning++; 
 			//print ("nCoroutineRunning: " + nCoroutineRunning);
-			
+
 			string serialIn = "";
 			try {
 				while (true) {  // BytesToRead crashes on Windows -> use ReadLine or ReadByte in a Thread or Coroutine
@@ -296,7 +309,7 @@ public class Serial : MonoBehaviour
 
 					//serialIn += s_serial.ReadLine();
 				}
-				
+
 			} catch (System.TimeoutException) {
 				//print ("System.TimeoutException in serial.ReadLine: " + te.ToString ());
 			} catch (System.Exception e) {
@@ -304,7 +317,7 @@ public class Serial : MonoBehaviour
 			}
 
 			if (serialIn.Length > 0) {
-				
+
 				//Debug.Log("just read some data: " + serialIn);
 				// Dispatch new data to each instance
 				foreach (Serial inst in s_instances) {
@@ -314,7 +327,7 @@ public class Serial : MonoBehaviour
 
 			yield return null;
 		}
-		
+
 	}
 
 	/// return all received lines and clear them
@@ -326,22 +339,22 @@ public class Serial : MonoBehaviour
 
 		if (!keepLines)
 			linesIn.Clear ();
-		
+
 		return lines;
 	}
-	
+
 	/// return only the last received line and clear them all
 	/// Useful when you need only the last received values and can ignore older ones
 	public string GetLastLine (bool keepLines = false)
 	{
-		
+
 		string line = "";
 		if (linesIn.Count > 0)
 			line = linesIn [linesIn.Count - 1];
-		
+
 		if (!keepLines)
 			linesIn.Clear ();
-		
+
 		return line;
 	}
 
@@ -384,9 +397,9 @@ public class Serial : MonoBehaviour
 	{
 
 		if (s_serial == null) {
-			
+
 			string portName = GetPortName ();
-			
+
 			if (portName == "") {
 				print ("Error: Couldn't find serial port.");
 				return false;
@@ -394,20 +407,20 @@ public class Serial : MonoBehaviour
 				if (s_debug)
 					print("Opening serial port: " + portName);
 			}
-			
+
 			s_serial = new SerialPort (portName, portSpeed);
-			
+
 			s_serial.Open ();
 			//print ("default ReadTimeout: " + s_serial.ReadTimeout);
 			//s_serial.ReadTimeout = 10;
-			
+
 			// clear input buffer from previous garbage
 			s_serial.DiscardInBuffer ();
 		}
 
 		return s_serial.IsOpen;
 	}
-	
+
 	// Data has been received, do what this instance has to do with it
 	protected void receivedData (string data)
 	{
@@ -418,24 +431,36 @@ public class Serial : MonoBehaviour
 
 		// Detect lines
 		if (NotifyLines || NotifyValues) {
-		
+
 			// prepend pending buffer to received data and split by line
 			string [] lines = (BufferIn + data).Split ('\n');
-			
+
 			// If last line is not empty, it means the line is not complete (new line did not arrive yet), 
 			// We keep it in buffer for next data.
 			int nLines = lines.Length;
 			BufferIn = lines [nLines - 1];
-			
+
 			// Loop until the penultimate line (don't use the last one: either it is empty or it has already been saved for later)
 			for (int iLine = 0; iLine < nLines - 1; iLine++) {
 				string line = lines [iLine];
 				//Debug.Log ("Received a line: " + line);
 
+				// skip first line 
+				if (!FirstLineReceived) {
+					FirstLineReceived = true;
+
+					if (SkipFirstLine) {
+						if (EnableDebugInfos) {
+							Debug.Log("First line skipped: " + line);
+						}
+						continue;
+					}
+				}
+
 				// Buffer line
 				if (RememberLines > 0) {
 					linesIn.Add (line);
-						
+
 					// trim lines buffer
 					int overflow = linesIn.Count - RememberLines;
 					if (overflow > 0) {
@@ -443,7 +468,7 @@ public class Serial : MonoBehaviour
 						linesIn.RemoveRange (0, overflow);
 					}
 				}
-					
+
 				// notify new line
 				if (NotifyLines) {
 					SendMessage ("OnSerialLine", line);
@@ -472,11 +497,11 @@ public class Serial : MonoBehaviour
 		case RuntimePlatform.LinuxPlayer:
 
 			portNames = System.IO.Ports.SerialPort.GetPortNames ();
-				
+
 			if (portNames.Length == 0) {
 				portNames = System.IO.Directory.GetFiles ("/dev/");                
 			}
-                     
+
 			foreach (string portName in portNames) {                                
 				if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 					return portName;
