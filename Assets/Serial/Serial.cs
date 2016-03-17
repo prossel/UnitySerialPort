@@ -1,5 +1,5 @@
 /* 
- * Version 0.3.2, 2016-01-22, Pierre Rossel
+ * Version 0.3.3, 2016-03-17, Pierre Rossel
  * 
  * This behavior helps sending and receiving data from a serial port. 
  * It detects line breaks and notifies the attached gameObject of new lines as they arrive.
@@ -358,16 +358,21 @@ public class Serial : MonoBehaviour
 		return line;
 	}
 
+	/// <summary>
+	/// Send data to the serial port.
+	/// </summary>
 	public static void Write (string message)
 	{
 		if (checkOpen ())
 			s_serial.Write (message);
 	}
 
+	/// <summary>
+	/// Send data to the serial port and append a new line character (\n)
+	/// </summary>
 	public static void WriteLn (string message = "")
 	{
-		if (s_serial != null && s_serial.IsOpen)
-			s_serial.Write (message);
+		s_serial.Write (message + "\n");
 	}
 
 	/// <summary>
