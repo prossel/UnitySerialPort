@@ -21,12 +21,13 @@ See the demo in Assets/Serial/Demo/Serial Demo.unity
 ## Usage 1: Receive data when you expect line breaks
 
 - drop this script to a gameObject
+- check the NotifyLines parameter
 - create a script on the same gameObject to receive new line notifications
 - add the `OnSerialLine()` function, here is an example
 
 ```c#
 void OnSerialLine(string line) {
-  print "Got a line: " + line;
+  Debug.Log("Got a line: " + line);
 }
 ```
 
