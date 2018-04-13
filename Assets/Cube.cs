@@ -32,7 +32,7 @@ public class Cube : MonoBehaviour
 			if (values.Length > 1) {
 				int val = int.Parse (values [1]);
 				//transform.Rotate(val, 0, 0);
-				transform.position = new Vector3 ((val) / 1000.0f, transform.position.y, transform.position.z);
+				transform.position = new Vector3 ((val) / 2000.0f, transform.position.y, transform.position.z);
 			}
 		}
 	}

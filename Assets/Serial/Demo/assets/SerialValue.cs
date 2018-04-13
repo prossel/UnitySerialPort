@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class SerialValue : MonoBehaviour {
@@ -10,7 +12,8 @@ public class SerialValue : MonoBehaviour {
 
 	void OnSerialValues(string[] values) {
 		if (Column < values.Length) {
-			GetComponent<GUIText>().text = "Last value [" + Column + "]: " + values[Column];
+			//GetComponent<GUIText>().text = "Last value [" + Column + "]: " + values[Column];
+			GetComponent<Text>().text = "Last value [" + Column + "]: " + values[Column];
 		}
 	}
 }
