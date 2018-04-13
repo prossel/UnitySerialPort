@@ -42,6 +42,13 @@ and don't forget to call `ClearReceivedBytes()` to avoid overflowing the buffer
 - from any script, call the static functions `Serial.write()` or `Serial.writeLn()`
 - if not not already, the serial port will be opened automatically.
 
+## Configuration
+Drop the SerialConfig component to an empty GameObject in your scene and configure:
+
+- the preferred ports
+- the speed
+- whether you wand debug informations in console
+ 
 # Troubleshooting
 
 ## Error CS0234 Ports does not exist in the namespace
